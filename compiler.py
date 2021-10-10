@@ -231,33 +231,3 @@ with open(fileName) as f:
         lineNumber+=1
     #call the selector with the list of instructions
     instructionsSelection(tok)
-
-                
- 
-
-
-
-
-'''    a1 = tok[2]   
-    r_hexa = []
-
-    for x in range(len(tok[1:])):
-        #r="{0:#0{1}x}".format(int(tok[x+1].upper()[1]),6)
-        r=formatbits.format(int(tok[x+1].upper()[1]))
-        r_hexa.append(r)
-    values=''.join(r_hexa)    
-    #Register  (ADD Rn, Rm, Ro)
-    if a1[0] == 'R':
-        comp_line="42".zfill(bits)+values
-        writetext("rom.txt", comp_line)
-    #Value  (ADD Rn, m)
-    else:
-        comp_line="43".zfill(bits)+values
-        writetext("rom.txt", comp_line)'''
-
-                    
-
-    
-
-
-
