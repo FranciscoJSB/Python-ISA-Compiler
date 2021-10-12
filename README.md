@@ -1,20 +1,10 @@
 # Python-ISA-Compiler
-compiler.py was made to take a text file with a set of custom ISA and create a new text file output with the hexadecimal values of each instruction
+compiler.py was made to take a text file with a set of custom ISA and create a new text file output with the binary values of each instruction
 
-A small example of the expected input file:
+The syntax, values of bits for each component of the comple value and number of instructions were defined by the teamgroup.
 
-#Test code
+Each instruction size will be of 32 bits, where opcode its 4 bits size, each register are 6 bits and additional to complete the 32 bits (used mostly on jumps/branches)
 
-MUL R1, R2, R7
+Jump and Jump Greater Equal take a list of [[label, line position]] in order to identufy where the other labels for the jumps are located and then assing it to the final value.
 
-.aux1
-ADD R1, R2, 85
-ADD R5, R3, R13
-JGE R2, R4, aux2
-JMP aux1
-
-.aux2
-SUB R4, R2, R1
-STR R9, R15
-LD R13, R4
-MV R11, R12
+A small example of the expected input file will be in the arm.txt file
