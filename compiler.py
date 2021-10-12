@@ -2,11 +2,13 @@
 '''
 Compiler for custom assembly ISA
 
-The program creates a text file with the hexadecimal values of the instructions
+The program creates a text file with the binary values of the instructions
 to be uploaded to the processor (CPU) 
 
 Inputs --> text file with the instructions following the nomenclature
-Outputs --> rom.txt file with hexadecimal equivalent of the instructions
+Outputs --> rom.txt file with binary equivalent of the instructions
+
+format --> OPcode (4 bits) + Register Destination (6 bits) + Register 1 (6 bits) + Register 2 (6 bits) + additional for 32 bits
 
 '''
 ##############################################################################################
@@ -18,104 +20,91 @@ import csv
 ##############################################################################################
 
 bits = 8
-formatbits = "{:#08}"
+formatbits = "{:06b}"
+space = ' '
 labels = []
 lineNumber=1
 tok = []
+
 ##############################################################################################
 
-def writetext(fn, b):
+def writetext(fn, instruction, b):
     #Output file
 	with open("rom.txt", "a") as new_file:
-        	new_file.write(str(b)+" ")
+        	new_file.write('{:<30}'.format(str(instruction))+'{:>30}'.format(str(b)+"\n"))
 
 ##############################################################################################
 ##################                  Arithmetic Functions                    ##################
 ##############################################################################################
 
 #Addition
-def ADD(parametros): 
+def ADD(i,parametros): 
 
-    r_hexa = []
-    for n in range(len(parametros[1:-1])):
-        r=formatbits.format(int(parametros[n+1][1:]),6)
-        r_hexa.append(r)
-    values=''.join(r_hexa)
-    # Case ADD Rn, Rm, Rl
-    if parametros[3][0] == "R":
-        comp_line="42".zfill(bits)+values+str(parametros[3][1:]).zfill(bits)
-        writetext("rom.txt", comp_line) 
-    else:
-    # Case ADD Rn, Rm, l         
-        comp_line="43".zfill(bits)+values+(str(parametros[3])).zfill(bits)
-        writetext("rom.txt", comp_line)    
+    r_bin = []
+    for n in range(len(parametros[1:])):
+        r=formatbits.format(int(parametros[n+1][1:]))
+        r_bin.append(r)
+    values=space.join(r_bin)
+
+    comp_line="0001"+space+values
+    writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line)
+   
 #Substraction
-def SUB(parametros):
+def SUB(i,parametros):
 
-    r_hexa = []
-    for n in range(len(parametros[1:-1])):
-        r=formatbits.format(int(parametros[n+1][1:]),6)
-        r_hexa.append(r)
-    values=''.join(r_hexa)
-    # Case SUB Rn, Rm, Rl
-    if parametros[3][0] == "R":
-        comp_line="44".zfill(bits)+values+str(parametros[3][1:]).zfill(bits)
-        writetext("rom.txt", comp_line) 
-    else:
-    # Case SUB Rn, Rm, l         
-        comp_line="45".zfill(bits)+values+(str(parametros[3])).zfill(bits)
-        writetext("rom.txt", comp_line)          
-
+    r_bin = []
+    for n in range(len(parametros[1:])):
+        r=formatbits.format(int(parametros[n+1][1:]))
+        r_bin.append(r)
+    values=space.join(r_bin)
+    comp_line="0010"+space+values
+    writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line)
+       
 #Multiplication
-def MUL(parametros): 
+def MUL(i,parametros): 
       
-    r_hexa = []
-    for n in range(len(parametros[1:-1])):
-        r=formatbits.format(int(parametros[n+1][1:]),6)
-        r_hexa.append(r)
-    values=''.join(r_hexa)
-    # Case MUL Rn, Rm, Rl
-    if parametros[3][0] == "R":
-        comp_line="46".zfill(bits)+values+str(parametros[3][1:]).zfill(bits)
-        writetext("rom.txt", comp_line) 
-    else:
-    # Case MUL Rn, Rm, l         
-        comp_line="47".zfill(bits)+values+(str(parametros[3])).zfill(bits)
-        writetext("rom.txt", comp_line)  
- 
+    r_bin = []
+    for n in range(len(parametros[1:])):
+        r=formatbits.format(int(parametros[n+1][1:]))
+        r_bin.append(r)
+    values=space.join(r_bin)
+
+    comp_line="0011"+space+values
+    writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line) 
+
 ##############################################################################################
 ##################                  Conditional Functions                    ##################
 ##############################################################################################
 
 def LABEL(parametros):     
-    # Create the list of all the labels and their lines to be asigned in the jumps / branches
+    # Create the list of all the labels and their lines to be assigned in the jumps / branches
     labels.append([line.replace('.','').replace('\n','')]+[str(lineNumber)])
     #Replaces the labels into blankspace
     tok = re.sub('.*[A-Za-z0-9_-]',' ',line[0]) # <-- Regular expresion 
 
 # Jump / Branch    
-def JMP(parametros):
+def JMP(i,parametros):
     # Searches for the line number and adds it to the final result (e.g. OPCode+0x00H ; H = line in code * 4 bits)
     for m in range(len(labels)):
         if parametros[1] == labels[m][0]:
-            writetext("rom.txt", "48".zfill(bits)+str(labels[m][1]).zfill(bits))
+            writetext("rom.txt", str(i)+". "+",".join(parametros), "0101"+space+("{:010b}".format(int(labels[m][1]))).zfill(28))
         else:
             continue
 
 # Jump Greater Equal
-def JGE(parametros):
+def JGE(i,parametros):
 
-    r_hexa = []
+    r_bin = []
     # Takes only items from position 1 and 2 of the list
     for n in range(len(parametros[1:-1])):
-        r=formatbits.format(int(parametros[n+1][1:]),6)
-        r_hexa.append(r)
-    values=''.join(r_hexa)
+        r=formatbits.format(int(parametros[n+1][1:]))
+        r_bin.append(r)
+    values=space.join(r_bin)
     # Searches for the line number and adds it to the final result (e.g. OPCode+Rn+Rm+0x00H ; H = line in code * 4 bits)
     for m in range(len(labels)):
         if parametros[3] == labels[m][0]:
-            comp_value = "49".zfill(bits)+values+str(labels[m][1]).zfill(bits)
-            writetext("rom.txt", comp_value)
+            comp_value = "0110"+space+values+space+("{:010b}".format(int(labels[m][1]))).zfill(16)
+            writetext("rom.txt", str(i)+". "+",".join(parametros), comp_value) 
         else:
             continue
 
@@ -123,44 +112,26 @@ def JGE(parametros):
 ##################                  Register Functions                      ##################
 ##############################################################################################
 
-def STORE(parametros):
+def STORE(i,parametros):
     
-    r_hexa = []
-    r=formatbits.format(int(parametros[1][1:]),6)
-    # Case STR Rn, Rm
-    if parametros[1][0] == "R":
-        comp_line="50".zfill(bits)+r+str(parametros[2][1:]).zfill(bits)
-        writetext("rom.txt", comp_line) 
-    else:
-    # Case STR Rn, m        
-        comp_line="51".zfill(bits)+r+(str(parametros[2])).zfill(bits)
-        writetext("rom.txt", comp_line) 
+    r_bin = []
+    for n in range(len(parametros[1:])):
+        r=formatbits.format(int(parametros[n+1][1:]))
+        r_bin.append(r)
+    values=space.join(r_bin)
+    comp_line="1000"+space+values+space.zfill(16)
+    writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line) 
 
-def LOAD(parametros): 
+def LOAD(i,parametros): 
 
-    r_hexa = []
-    r=formatbits.format(int(parametros[1][1:]),6)
-    # Case LD Rn, Rm
-    if parametros[1][0] == "R":
-        comp_line="52".zfill(bits)+r+str(parametros[2][1:]).zfill(bits)
-        writetext("rom.txt", comp_line) 
-    else:
-    # Case LD Rn, m        
-        comp_line="53".zfill(bits)+r+(str(parametros[2])).zfill(bits)
-        writetext("rom.txt", comp_line) 
+    r_bin = []
+    for n in range(len(parametros[1:])):
+        r=formatbits.format(int(parametros[n+1][1:]))
+        r_bin.append(r)
+    values=space.join(r_bin)
+    comp_line="0111"+space+values+space.zfill(16)
+    writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line) 
 
-def MOVE(parametros): 
-
-    r_hexa = []
-    r=formatbits.format(int(parametros[1][1:]),6)
-    # Case MOV Rn, Rm
-    if parametros[1][0] == "R":
-        comp_line="54".zfill(bits)+r+str(parametros[2][1:]).zfill(bits)
-        writetext("rom.txt", comp_line) 
-    else:
-    # Case MOV Rn, m        
-        comp_line="55".zfill(bits)+r+(str(parametros[2])).zfill(bits)
-        writetext("rom.txt", comp_line) 
 
 #############################################################################################
 ##################                  Check for Instructions                 ##################
@@ -169,31 +140,29 @@ def MOVE(parametros):
 def instructionsSelection(parametros):
                        
         for i in range(len(tok)):
-            instruction = tok[i][0]
+            instructionLine = tok[i][0]
             #Addition
-            if instruction == "ADD":
-                ADD(tok[i])
+
+            if instructionLine == "ADD":
+                ADD(i+1,tok[i])
             #Substraction
-            elif instruction == "SUB":
-                SUB(tok[i])
+            elif instructionLine == "SUB":
+                SUB(i+1,tok[i])
             #Multiplication
-            elif instruction == "MUL":
-                MUL(tok[i])
+            elif instructionLine == "MUL":
+                MUL(i+1,tok[i])
             # Store
-            elif instruction == "STR":
-                STORE(tok[i])
+            elif instructionLine == "STR":
+                STORE(i+1,tok[i])
             # Load
-            elif instruction == "LD":
-                LOAD(tok[i])
-            # Move
-            elif instruction == "MV":
-                MOVE(tok[i])
+            elif instructionLine == "LD":
+                LOAD(i+1,tok[i])
             # Jump / Branch    
-            elif instruction == "JMP": 
-                JMP(tok[i])
+            elif instructionLine == "JMP": 
+                JMP(i+1,tok[i])
             # Jump Greater Equal
-            elif instruction == "JGE":
-                JGE(tok[i])
+            elif instructionLine == "JGE":
+                JGE(i+1,tok[i])
             #Invalid syntax
             else:
                 print("Invalid register name")
