@@ -19,9 +19,9 @@ import csv
 ##################                  Variables                               ##################
 ##############################################################################################
 
-bits = 8
+bits = 10 #additional values 
 formatbits = "{:06b}"
-space = ' '
+space = ''
 labels = []
 lineNumber=1
 tok = []
@@ -46,7 +46,7 @@ def ADD(i,parametros):
         r_bin.append(r)
     values=space.join(r_bin)
 
-    comp_line="0001"+space+values
+    comp_line="0001"+space+values+space.zfill(bits)
     writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line)
    
 #Substraction
@@ -57,7 +57,7 @@ def SUB(i,parametros):
         r=formatbits.format(int(parametros[n+1][1:]))
         r_bin.append(r)
     values=space.join(r_bin)
-    comp_line="0010"+space+values
+    comp_line="0010"+space+values+space.zfill(bits)
     writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line)
        
 #Multiplication
@@ -69,7 +69,7 @@ def MUL(i,parametros):
         r_bin.append(r)
     values=space.join(r_bin)
 
-    comp_line="0011"+space+values
+    comp_line="0011"+space+values+space.zfill(bits)
     writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line) 
 
 ##############################################################################################
