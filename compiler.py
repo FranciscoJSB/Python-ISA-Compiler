@@ -21,8 +21,8 @@ import csv
 
 bits = 10 #additional values 
 formatbits = "{:06b}"
-outputFile = "rom.txt" # output file name
-space = ''
+outputFile = "rom.txt" # output file name, change here
+space = '' # simple space to add 0s
 labels = []
 lineNumber=1
 tok = []
@@ -31,9 +31,12 @@ tok = []
 ##############################################################################################
 
 def writetext(fn, instruction, b):
+    #Split the binary into segments of 8 bits
+    n = 8
+    split_strings = [str(b)[index : index + n] for index in range(0, len(b), n)]
     #Output file
-	with open("rom.txt", "a") as new_file:
-        	new_file.write('{:<30}'.format(str(instruction))+'{:>30}'.format(str(b)+"\n"))
+    with open(outputFile, "a") as new_file:
+        	new_file.write('{:<30}'.format(str(instruction))+'{:>30}'.format((str(split_strings)).replace("'",'').replace(',', '').strip('[]')+"\n"))
 
 ##############################################################################################
 ##################                  Arithmetic Functions                    ##################
