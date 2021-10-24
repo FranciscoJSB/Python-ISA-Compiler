@@ -1,0 +1,18 @@
+from PIL import Image
+import random
+
+data = [random.choice((0, 1)) for _ in range(62500)]
+data[:] = [data[i:i + 250] for i in range(0, 62500, 250)]
+
+#    with open("binaryRandom.txt", "a") as new_file:
+#                new_file.write(str(data))
+
+img = Image.new('1', (250, 250))
+pixels = img.load()
+
+for i in range(img.size[0]):
+    for j in range(img.size[1]):
+        pixels[i, j] = data[i][j]
+
+img.show()
+img.save('image.png')

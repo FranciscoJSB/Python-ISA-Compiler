@@ -1,0 +1,73 @@
+#1,2,3,4,6,10,32
+add x1, x1, x1
+add x2, x2, x2
+
+.placeBit
+#x5 = x
+#x7 = y
+#tests
+add x31, x0, x32
+add x5, x5, x31
+add x7, x7, x0
+#1 temporal para sumas
+add x16, x16, x4
+add x17, x17, x1
+add x18, x18, x2
+
+#Direccion de memoria base temporal
+add x19, x0, x200
+# Mete 250 en 20
+add x20, x0, x250
+# Y * 250
+mul x20, x20, x7
+# Y * 250 + X
+add x20, x20, x5
+add x21, x21, x32
+#addi x22, x22, x1
+
+.loop32
+#Cheque si 32>counter
+beq x21, x20, loop32Aux
+bge x21, x20, loopExp
+
+.loop32Aux
+#Sino counter - 32
+sub x20, x20, x21
+# x22 = i++
+add x22, x22, x1
+j loop32
+
+.loopExp
+add x23, x23, x1
+#32 - x
+sub x20, x21, x20
+sub x20, x20, x17
+#Chequea si contador es 1 
+beq x20, x17, expOne
+#Chequea si contador es 0
+beq x20, x0, expZero
+
+.loopExpAux
+#Chequea si ciclo termino
+beq x20, x0, saveBit
+#Sino multiplica x2
+mul x23, x23, x18
+sub x20, x20, x17
+j loopExpAux
+
+.expZero 
+#2^0 es 1
+add x23, x23, x17
+j saveBit
+
+.expOne
+#2^1 = 2
+add x23, x23, x2
+j saveBit
+
+.saveBit
+mul x22, x22, x16
+add x25, x22, x19
+lw x26, x25
+or x26, x26, x23
+sw x26, x25
