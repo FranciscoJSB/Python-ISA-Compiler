@@ -82,7 +82,7 @@ def OR(i,parametros):
         r=formatbits.format(int(parametros[n+1][1:]))
         r_bin.append(r)
     values=space.join(r_bin)
-    comp_line="1100"+space+values+space.zfill(bits)
+    comp_line="1011"+space+values+space.zfill(bits)
     writetext(outputFile, str(i)+". "+",".join(parametros), comp_line) 
 
 ##############################################################################################
@@ -109,7 +109,7 @@ def JMP(i,parametros):
         # Searches for the line number and adds it to the final result (e.g. OPCode+Rn+Rm+0x00H ; H = line in code * 4 bits)
         for m in range(len(labels)):
             if parametros[3] == labels[m][0]:
-                comp_value = "1111"+space+values+space+("{:010b}".format(int(labels[m][1]))).zfill(16)
+                comp_value = "1001"+space+values+space+("{:010b}".format(int(labels[m][1]))).zfill(16)
                 writetext(outputFile, str(i)+". "+",".join(parametros), comp_value) 
             else:
                 continue
@@ -175,25 +175,25 @@ def instructionsSelection(parametros):
             instructionLine = tok[i][0]
             #Addition
 
-            if instructionLine == "ADD" or instructionLine == "add":
+            if instructionLine == "SUMA" or instructionLine == "add":
                 ADD(i+1,tok[i])
             #Substraction
-            elif instructionLine == "SUB" or instructionLine == "sub":
+            elif instructionLine == "REST" or instructionLine == "sub":
                 SUB(i+1,tok[i])
             #Multiplication
-            elif instructionLine == "MUL" or instructionLine == "mul":
+            elif instructionLine == "MULT" or instructionLine == "mul":
                 MUL(i+1,tok[i])
             # Store
-            elif instructionLine == "STR" or instructionLine == "sw" :
+            elif instructionLine == "GUARDAR" or instructionLine == "sw" :
                 STORE(i+1,tok[i])
             # Load
-            elif instructionLine == "LD" or instructionLine == "lw":
+            elif instructionLine == "CARGAR" or instructionLine == "lw":
                 LOAD(i+1,tok[i])
             # Jump / Branch  and Jump Equal / Branch Equal 
-            elif instructionLine == "JMP" or instructionLine == "j" or instructionLine == "beq": 
+            elif instructionLine == "SALTO" or instructionLine == "j" or instructionLine == "beq": 
                 JMP(i+1,tok[i])
             # Jump Greater Equal
-            elif instructionLine == "JGE" or instructionLine == "bge":
+            elif instructionLine == "SALTMQ" or instructionLine == "bge":
                 JGE(i+1,tok[i])
             # Logic OR
             elif instructionLine == "OR" or instructionLine == "or":
