@@ -21,10 +21,12 @@ import csv
 
 bits = 10 #additional values 
 formatbits = "{:06b}"
+outputFile = "rom.txt" # output file name
 space = ''
 labels = []
 lineNumber=1
 tok = []
+
 
 ##############################################################################################
 
@@ -45,9 +47,8 @@ def ADD(i,parametros):
         r=formatbits.format(int(parametros[n+1][1:]))
         r_bin.append(r)
     values=space.join(r_bin)
-
     comp_line="0001"+space+values+space.zfill(bits)
-    writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line)
+    writetext(outputFile, str(i)+". "+",".join(parametros), comp_line)
    
 #Substraction
 def SUB(i,parametros):
@@ -58,7 +59,7 @@ def SUB(i,parametros):
         r_bin.append(r)
     values=space.join(r_bin)
     comp_line="0010"+space+values+space.zfill(bits)
-    writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line)
+    writetext(outputFile, str(i)+". "+",".join(parametros), comp_line)
        
 #Multiplication
 def MUL(i,parametros): 
@@ -68,9 +69,21 @@ def MUL(i,parametros):
         r=formatbits.format(int(parametros[n+1][1:]))
         r_bin.append(r)
     values=space.join(r_bin)
-
     comp_line="0011"+space+values+space.zfill(bits)
-    writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line) 
+    writetext(outputFile, str(i)+". "+",".join(parametros), comp_line) 
+
+##############################################################################################
+##################                  Logical Functions                    ##################
+##############################################################################################
+
+def OR(i,parametros):
+    r_bin = []
+    for n in range(len(parametros[1:])):
+        r=formatbits.format(int(parametros[n+1][1:]))
+        r_bin.append(r)
+    values=space.join(r_bin)
+    comp_line="1100"+space+values+space.zfill(bits)
+    writetext(outputFile, str(i)+". "+",".join(parametros), comp_line) 
 
 ##############################################################################################
 ##################                  Conditional Functions                    ##################
@@ -84,12 +97,31 @@ def LABEL(parametros):
 
 # Jump / Branch    
 def JMP(i,parametros):
+
+    r_bin = []
+    # Checks if the jump its jump equal 
+    if parametros[1][0]=="x" or parametros[1][0]=="r":
+        # Takes only items from position 1 and 2 of the list
+        for n in range(len(parametros[1:-1])):
+            r=formatbits.format(int(parametros[n+1][1:]))
+            r_bin.append(r)
+        values=space.join(r_bin)
+        # Searches for the line number and adds it to the final result (e.g. OPCode+Rn+Rm+0x00H ; H = line in code * 4 bits)
+        for m in range(len(labels)):
+            if parametros[3] == labels[m][0]:
+                comp_value = "1111"+space+values+space+("{:010b}".format(int(labels[m][1]))).zfill(16)
+                writetext(outputFile, str(i)+". "+",".join(parametros), comp_value) 
+            else:
+                continue
+
+    # Then its normal jump
+    else:
     # Searches for the line number and adds it to the final result (e.g. OPCode+0x00H ; H = line in code * 4 bits)
-    for m in range(len(labels)):
-        if parametros[1] == labels[m][0]:
-            writetext("rom.txt", str(i)+". "+",".join(parametros), "0101"+space+("{:010b}".format(int(labels[m][1]))).zfill(28))
-        else:
-            continue
+        for m in range(len(labels)):
+            if parametros[1] == labels[m][0]:
+                writetext(outputFile, str(i)+". "+",".join(parametros), "0101"+space+("{:010b}".format(int(labels[m][1]))).zfill(28))
+            else:
+                continue
 
 # Jump Greater Equal
 def JGE(i,parametros):
@@ -104,7 +136,7 @@ def JGE(i,parametros):
     for m in range(len(labels)):
         if parametros[3] == labels[m][0]:
             comp_value = "0110"+space+values+space+("{:010b}".format(int(labels[m][1]))).zfill(16)
-            writetext("rom.txt", str(i)+". "+",".join(parametros), comp_value) 
+            writetext(outputFile, str(i)+". "+",".join(parametros), comp_value) 
         else:
             continue
 
@@ -120,7 +152,7 @@ def STORE(i,parametros):
         r_bin.append(r)
     values=space.join(r_bin)
     comp_line="1000"+space+values+space.zfill(16)
-    writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line) 
+    writetext(outputFile, str(i)+". "+",".join(parametros), comp_line) 
 
 def LOAD(i,parametros): 
 
@@ -130,7 +162,7 @@ def LOAD(i,parametros):
         r_bin.append(r)
     values=space.join(r_bin)
     comp_line="0111"+space+values+space.zfill(16)
-    writetext("rom.txt", str(i)+". "+",".join(parametros), comp_line) 
+    writetext(outputFile, str(i)+". "+",".join(parametros), comp_line) 
 
 
 #############################################################################################
@@ -143,26 +175,29 @@ def instructionsSelection(parametros):
             instructionLine = tok[i][0]
             #Addition
 
-            if instructionLine == "ADD":
+            if instructionLine == "ADD" or instructionLine == "add":
                 ADD(i+1,tok[i])
             #Substraction
-            elif instructionLine == "SUB":
+            elif instructionLine == "SUB" or instructionLine == "sub":
                 SUB(i+1,tok[i])
             #Multiplication
-            elif instructionLine == "MUL":
+            elif instructionLine == "MUL" or instructionLine == "mul":
                 MUL(i+1,tok[i])
             # Store
-            elif instructionLine == "STR":
+            elif instructionLine == "STR" or instructionLine == "sw" :
                 STORE(i+1,tok[i])
             # Load
-            elif instructionLine == "LD":
+            elif instructionLine == "LD" or instructionLine == "lw":
                 LOAD(i+1,tok[i])
-            # Jump / Branch    
-            elif instructionLine == "JMP": 
+            # Jump / Branch  and Jump Equal / Branch Equal 
+            elif instructionLine == "JMP" or instructionLine == "j" or instructionLine == "beq": 
                 JMP(i+1,tok[i])
             # Jump Greater Equal
-            elif instructionLine == "JGE":
+            elif instructionLine == "JGE" or instructionLine == "bge":
                 JGE(i+1,tok[i])
+            # Logic OR
+            elif instructionLine == "OR" or instructionLine == "or":
+                OR(i+1,tok[i])
             #Invalid syntax
             else:
                 print("Invalid register name")
