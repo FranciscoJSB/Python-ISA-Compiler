@@ -112,7 +112,7 @@ def JMP(i,parametros):
         # Searches for the line number and adds it to the final result (e.g. OPCode+Rn+Rm+0x00H ; H = line in code * 4 bits)
         for m in range(len(labels)):
             if parametros[3] == labels[m][0]:
-                comp_value = "1001"+space+values+space+("{:010b}".format(int(labels[m][1]))).zfill(16)
+                comp_value = "1001"+space+values+space+("{:010b}".format((int(labels[m][1])*4))).zfill(16)
                 writetext(outputFile, str(i)+". "+",".join(parametros), comp_value) 
             else:
                 continue
@@ -122,7 +122,7 @@ def JMP(i,parametros):
     # Searches for the line number and adds it to the final result (e.g. OPCode+0x00H ; H = line in code * 4 bits)
         for m in range(len(labels)):
             if parametros[1] == labels[m][0]:
-                writetext(outputFile, str(i)+". "+",".join(parametros), "0101"+space+("{:010b}".format(int(labels[m][1]))).zfill(28))
+                writetext(outputFile, str(i)+". "+",".join(parametros), "0101"+space+("{:010b}".format((int(labels[m][1])*4))).zfill(28))
             else:
                 continue
 
@@ -138,7 +138,7 @@ def JGE(i,parametros):
     # Searches for the line number and adds it to the final result (e.g. OPCode+Rn+Rm+0x00H ; H = line in code * 4 bits)
     for m in range(len(labels)):
         if parametros[3] == labels[m][0]:
-            comp_value = "0110"+space+values+space+("{:010b}".format(int(labels[m][1]))).zfill(16)
+            comp_value = "0110"+space+values+space+("{:010b}".format((int(labels[m][1])*4))).zfill(16)
             writetext(outputFile, str(i)+". "+",".join(parametros), comp_value) 
         else:
             continue
